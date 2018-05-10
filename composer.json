@@ -47,8 +47,11 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Spatie\\SchemalessAttributes\\SchemalessAttributesServiceProvider"
-            ]
+                "Spatie\\Skeleton\\SkeletonServiceProvider"
+            ],
+            "aliases": {
+                "Skeleton": "Spatie\\Skeleton\\SkeletonFacade"
+            }
         }
     }
 }

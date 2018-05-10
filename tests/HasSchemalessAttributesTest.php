@@ -31,6 +31,16 @@ class HasSchemalessAttributesTest extends TestCase
     }
 
     /** @test */
+    public function it_can_determine_if_it_has_a_schemaless_attribute()
+    {
+        $this->assertFalse($this->testModel->schemaless_attributes->has('name'));
+
+        $this->testModel->schemaless_attributes->name = 'value';
+
+        $this->assertTrue($this->testModel->schemaless_attributes->has('name'));
+    }
+
+    /** @test */
     public function schemaless_attributes_will_get_saved_with_the_model()
     {
         $this->testModel->schemaless_attributes->name = 'value';
@@ -211,18 +221,6 @@ class HasSchemalessAttributesTest extends TestCase
 
         $this->assertContainsModels([
         ], TestModel::withSchemalessAttributes('name', 'non-existing-value')->get());
-    }
-
-    /** @test */
-    public function it_can_set_multiple_attributes_one_after_the_other()
-    {
-        $this->testModel->schemaless_attributes->name = 'value';
-        $this->testModel->schemaless_attributes->name2 = 'value2';
-
-        $this->assertEquals([
-            'name' => 'value',
-            'name2' => 'value2',
-        ], $this->testModel->schemaless_attributes->all());
     }
 
     protected function assertContainsModels(array $expectedModels, Collection $actualModels)
