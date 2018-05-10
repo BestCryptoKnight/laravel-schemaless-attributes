@@ -70,7 +70,7 @@ class TestModel extends Model
     ...
 
     public $casts = [
-        'extra_attributes' => 'array'
+        'extra_attributes' => 'array',
     ];
 
     public function getExtraAttributesAttribute(): SchemalessAttributes
@@ -84,6 +84,29 @@ class TestModel extends Model
     }
     
     ...
+}
+```
+
+If you want to reuse this behaviour across multiple models you could opt to put the function in a trait of your own. Here's what that trait could look like:
+
+```php
+namespace App\Models\Concerns;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Spatie\SchemalessAttributes\SchemalessAttributes;
+
+trait HasSchemalessAttributes
+{
+    public function getExtraAttributesAttribute(): SchemalessAttributes
+    {
+       return SchemalessAttributes::createForModel($this, 'extra_attributes');
+    }
+
+    public function scopeWithExtraAttributes(): Builder
+    {
+        return SchemalessAttributes::scopeWithSchemalessAttributes('extra_attributes');
+    }
 }
 ```
 
@@ -151,7 +174,40 @@ If you only want to search on a single custom attribute, you can use the scope l
 $yourModel->withExtraAttributes('name', 'value')->get();
 ```
 
-### Testing
+### Easy accessing schemaless attributes
+
+This is the default way of setting / getting a schemaless attribute:
+
+```php
+// let's first set a value
+$yourModel->extra_attributes->extra_property = 'value';
+
+// and then get it
+$yourModel->extra_attributes->extra_property; // returns 'value'
+```
+
+You can make the getting part a bit shorter by overriding the `__get` method on your model like this:
+
+```
+// on your model
+
+public function __get($key)
+{
+    if ($this->extra_attributes->has($key)) {
+        return $this->extra_attributes->get($key);
+    }
+    
+    return parent::__get($key);
+}
+```
+
+With the in place you can do this:
+
+```php
+$yourModel->extra_property; // returns 'value'
+```
+
+## Testing
 
 First create a mysql database named `laravel_extra_attributes`. After that you can run the tests with:
 
@@ -159,7 +215,7 @@ First create a mysql database named `laravel_extra_attributes`. After that you c
 composer test
 ```
 
-### Changelog
+## Changelog
 
 Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently.
 
@@ -167,7 +223,7 @@ Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recen
 
 Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
-### Security
+## Security
 
 If you discover any security related issues, please email freek@spatie.be instead of using the issue tracker.
 
